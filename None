@@ -1,0 +1,6 @@
+2026-10-08 20:52:08 | INFO     | keylogger | start:159 | Starting keylogger...
+2026-10-08 20:52:08 | INFO     | keylogger | start:160 | Server: http://127.0.0.1:8080
+2026-10-08 20:52:08 | INFO     | keylogger | start:161 | Interval: 10s
+2026-10-08 20:52:08 | INFO     | keylogger | start:162 | TLS: Disabled
+2026-10-08 20:52:08 | INFO     | keylogger | start:163 | Press ESC to stop
+2026-10-08 20:52:08 | INFO     | keylogger | _sender_loop:131 | Sender thread started (interval: 10s)
