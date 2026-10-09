@@ -39,6 +39,26 @@ python-keylogger/
 
 ## Installation
 
+### Using uv (Recommended - Fast)
+
+```bash
+# Install uv if not already installed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Clone and enter directory
+git clone <repository-url>
+cd python-keylogger
+
+# Create virtual environment and install dependencies in one command
+uv sync
+
+# Or manually:
+uv venv
+uv pip install -r requirements.txt
+```
+
+### Using Standard pip
+
 ```bash
 # Clone and enter directory
 git clone <repository-url>
@@ -142,6 +162,24 @@ python keylogger_server.py [port]
 - **Control Characters**: Logged as `[CTRL:<code>]`
 
 ## Development
+
+### Using uv (Recommended)
+
+```bash
+# Install dev dependencies
+uv sync --dev
+
+# Run type checking
+uv run mypy keylogger/
+
+# Format code
+uv run black keylogger/
+
+# Run tests (when available)
+uv run pytest
+```
+
+### Using Standard pip
 
 ```bash
 # Install dev dependencies

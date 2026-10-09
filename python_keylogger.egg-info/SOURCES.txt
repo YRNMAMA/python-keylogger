@@ -1,0 +1,15 @@
+README.md
+pyproject.toml
+keylogger/__init__.py
+keylogger/__main__.py
+keylogger/buffer.py
+keylogger/client.py
+keylogger/config.py
+keylogger/core.py
+keylogger/logger.py
+keylogger/server.py
+python_keylogger.egg-info/PKG-INFO
+python_keylogger.egg-info/SOURCES.txt
+python_keylogger.egg-info/dependency_links.txt
+python_keylogger.egg-info/requires.txt
+python_keylogger.egg-info/top_level.txt
